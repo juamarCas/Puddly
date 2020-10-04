@@ -8,6 +8,7 @@ TagManager:
   - Tile
   - Ghost
   - Villager
+  - TownCenter
   layers:
   - Default
   - TransparentFX

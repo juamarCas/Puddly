@@ -11,6 +11,7 @@ public class Unit : MonoBehaviour
     private List<Tiles> tiles;
     [Header("Options")]
     [SerializeField] private GameObject optionsPanel; 
+
     // Start is called before the first frame update
     [Header("Characteristics")]
     public string unitName;
@@ -53,7 +54,8 @@ public class Unit : MonoBehaviour
         }
     }
 
-    public void Destroy()
+    //well, it actually doesn't destroy anything, just reset the tiles states
+    public void Destroy() 
     {
         for (int i = 0; i < tiles.Count; i++)
         {

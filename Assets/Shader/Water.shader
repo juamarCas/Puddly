@@ -6,27 +6,28 @@
 		_DepthGradientDeep("Depth Gradient Deep", Color) = (0.086, 0.407, 1, 0.749)
 		_DepthMaxDistance("Depth Maximum Distance", Float) = 1
 
-		[Space]
+		[Space(10)]
 
 		_SurfaceNoise("Surface noise", 2D) = "white"{}
 		_SurfaceDistortion("Surface Distortion", 2D) = "white" {}
 
-		[Space]
+		[Space(10)]
 
 		_SurfaceDistortionAmount("Surface Distortion Amount", Range(0,1)) = 0.27
 		_SurfaceNoiseCutoff("Surface Noise Cutoff", Range(0,1)) = 0.777
 
-		[Space]
+		[Space(10)]
 
 		_FoamMaxDistance("Foam Maximum Distance", Float) = 0.4
 		_FoamMinDistance("Foam Minimum Distance", Float) = 0.04
+		_FoamDistance("Foam Distance", Float) = 0.4
 		_FoamColor("Foam Color", Color) = (1 ,1 ,1 ,1)
 
-		[Space]
+		[Space(10)]
 
 		_SurfaceNoiseScroll("Surface Noise Scroll Amout", Vector) = (0.03, 0.03, 0, 0)
 
-		[Space]
+		[Space(10)]
 		_Divide("Divide", Float) = 1
     }
     SubShader
@@ -79,7 +80,8 @@
 
 			float _FoamMaxDistance;
 			float _FoamMinDistance;
-			float4 _FoamColor; 
+			float4 _FoamColor;
+			float _FoamDistance; 
 
 			float2 _SurfaceNoiseScroll;
 
@@ -129,12 +131,12 @@
 
 				float3 existingNormal = tex2Dproj(_CameraNormalsTexture, UNITY_PROJ_COORD(i.screenPosition)); 
 				float3 normalDot = saturate(dot(existingNormal, i.viewNormal)); 
-				float foamDistance = lerp(_FoamMaxDistance, _FoamMinDistance, normalDot);
-				float foamDepthDifference01 = saturate(depthDifference / foamDistance);				
+				//float foamDistance = lerp(_FoamMaxDistance, _FoamMinDistance, normalDot);
+				float foamDepthDifference01 = saturate(depthDifference / _FoamDistance);				
 
 				float surfaceNoiseCutoff = foamDepthDifference01 * _SurfaceNoiseCutoff;
-				float2 distortSample = (tex2D(_SurfaceDistortion, i.distortUV).xy * 2 - 1)*_SurfaceDistortionAmount; ;
-				float2 noiseUV = float2((i.noiseUV.x + _Time.y * _SurfaceNoiseScroll.x) + distortSample.x, (i.noiseUV.y + _Time.y * _SurfaceNoiseScroll.y) + distortSample.y);
+				//float2 distortSample = (tex2D(_SurfaceDistortion, i.distortUV).xy * 2 - 1)*_SurfaceDistortionAmount; ;
+				float2 noiseUV = float2((i.noiseUV.x + _Time.y * _SurfaceNoiseScroll.x) , (i.noiseUV.y + _Time.y * _SurfaceNoiseScroll.y) );
 				float surfaceNoiseSample = tex2D(_SurfaceNoise, noiseUV).r;				
 				float surfaceNoise = smoothstep(surfaceNoiseCutoff - SMOOTHSTEP_AA, surfaceNoiseCutoff + SMOOTHSTEP_AA, surfaceNoiseSample); 
 		

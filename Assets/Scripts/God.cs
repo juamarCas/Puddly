@@ -21,12 +21,12 @@ public class God : MonoBehaviour
     //is selecting place to construct? 
     private bool isConstructing;
 
-    // saves the gameobject you interact with
-    [SerializeField] List<Unit> units = new List<Unit>();
+    // saves the gameobject you interact with, the list of units o the unit
+    [SerializeField] List<Unit> units = new List<Unit>(); 
 
     // units you have created
-    [SerializeField] List<Unit> createdUnits = new List<Unit>(); 
-    
+    [SerializeField] List<Unit> createdUnits = new List<Unit>(); //optimize this list, only the units in the camera view can enter this list
+
 
     //by now, not important, is for UI check
     private int FingerID = -1; 
@@ -38,13 +38,14 @@ public class God : MonoBehaviour
     private Vector2 endPos; 
     
     // states 
-    public enum States {Free = 0, HasVillager = 1, HasWarrior = 2, HasMixed = 3, HasBuilding = 4 }; //mixed means has warriors and villagers
-    public enum BuildingSel {Nothing = -1,House = 0}
+    public enum States {Free = 0, HasVillager = 1, HasWarrior = 2, HasMixed = 3, HasTownCenter = 4 }; //mixed means has warriors and villagers
+    public enum BuildingSel {Nothing = -1,TownCenter = 0, Armery = 1, Archers = 2}; 
 
     [Header("Components")]
     public float buildCoolDown;
     public Color canBuildHere;
     public Color cantBuildHere;
+    public int maxPoblation = 100; 
 
     /*
            Color: 
@@ -60,6 +61,9 @@ public class God : MonoBehaviour
     [Header("UI Elements")]
     [SerializeField] private CanvasManager canvas;
     public RectTransform selectionBox;
+    public GameObject UIHolder;
+    public GameObject TownCenterOptions;
+    public GameObject VillagerOptions; 
 
 
     [Header("Masks")]
@@ -73,6 +77,7 @@ public class God : MonoBehaviour
     {
         cam = Camera.main; 
         state = States.Free;
+        UIHolder.gameObject.SetActive(false);
         buildSel = BuildingSel.Nothing; 
         #if !UNITY_EDITOR
         fingerID = 0; 
@@ -86,8 +91,8 @@ public class God : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Q))
         {
             isConstructing = true; 
-            buildSel = BuildingSel.House;
-            selectedBuilding = (int)BuildingSel.House; 
+            buildSel = BuildingSel.TownCenter;
+            selectedBuilding = (int)BuildingSel.TownCenter; 
         }else if (Input.GetKeyDown(KeyCode.Escape))
         {
             if(buildSel != BuildingSel.Nothing)
@@ -100,7 +105,8 @@ public class God : MonoBehaviour
         if (Input.GetMouseButtonDown(0) && Input.GetKey(KeyCode.LeftShift))
         {
             GameObject unit = SelectObject(selectableUnitMask);
-            units.Add(unit.GetComponent<Unit>());
+            if(unit != null)
+                units.Add(unit.GetComponent<Unit>());
             unit = null; 
         } else if (Input.GetMouseButtonDown(0))
         {
@@ -112,18 +118,28 @@ public class God : MonoBehaviour
                 //selecting a unit   
                 GameObject unit = SelectObject(selectableUnitMask);
                 if (unit != null)
-                {
+                {                  
+                    UIHolder.gameObject.SetActive(true);
+                    SetOffUI();
                     units.Clear(); 
                     canvas.nameText.text = unit.GetComponent<Unit>().unitName;
-                    if (unit.gameObject.tag == "Villager")
-                    {               
-                        state = States.HasVillager;                      
-                        units.Add(unit.GetComponent<Unit>()); 
-                    }
-                    else
+                    switch (unit.gameObject.tag)
                     {
-                        state = States.Free; 
-                    }                  
+                        case "Villager":
+                            state = States.HasVillager;
+                            units.Add(unit.GetComponent<Unit>());
+                            break;
+                        case "TownCenter":
+                            state = States.HasTownCenter;
+                            TownCenterOptions.gameObject.SetActive(true); 
+                            units.Add(unit.GetComponent<Unit>());
+                            break;
+                        default:
+                            state = States.Free;
+                            break; 
+
+                    }
+                      
                 }           
             }
         }else if (Input.GetMouseButtonDown(1))
@@ -150,7 +166,8 @@ public class God : MonoBehaviour
         //end box selection
         if (Input.GetMouseButtonUp(0))
         {
-            ReleaseSelectionBox(); 
+            if(!isConstructing)
+                ReleaseSelectionBox(); 
         }
 
         //start box selection
@@ -161,7 +178,7 @@ public class God : MonoBehaviour
         #endregion
 
 
-        if (buildSel == BuildingSel.House)
+        if (buildSel == BuildingSel.TownCenter)
         {
             hoverTile(); 
         }
@@ -235,7 +252,12 @@ public class God : MonoBehaviour
     void UnSelectUnit()
     {
         if (units.Count > 0)
-        {
+        {           
+            if (TownCenterOptions.gameObject.activeInHierarchy)
+            {
+                TownCenterOptions.SetActive(false); 
+            }
+            UIHolder.gameObject.SetActive(false);
             canvas.nameText.text = "";
             units.Clear(); 
             state = States.Free; 
@@ -272,20 +294,30 @@ public class God : MonoBehaviour
         Vector2 min = selectionBox.anchoredPosition - (selectionBox.sizeDelta / 2);
         Vector2 max = selectionBox.anchoredPosition + (selectionBox.sizeDelta / 2); 
 
-        foreach(Unit puddly in createdUnits)
+        if(createdUnits.Count > 0)
         {
-            Vector3 screenPos = cam.WorldToScreenPoint(puddly.transform.position); 
-
-            if(screenPos.x > min.x && screenPos.x < max.x && screenPos.y > min.y && screenPos.y < max.y)
+            foreach (Unit puddly in createdUnits)
             {
-                units.Add(puddly);          
+                Vector3 screenPos = cam.WorldToScreenPoint(puddly.transform.position);
+
+                if (screenPos.x > min.x && screenPos.x < max.x && screenPos.y > min.y && screenPos.y < max.y)
+                {
+                    units.Add(puddly);
+                }
             }
         }
+       
 
         if(units.Count > 0)
         {
             state = States.HasVillager; 
         }
+    }
+
+    void SetOffUI()
+    {
+        TownCenterOptions.SetActive(false);
+        VillagerOptions.SetActive(false); 
     }
     #endregion
 
@@ -301,6 +333,14 @@ public class God : MonoBehaviour
     {
         yield return new WaitForSeconds(buildCoolDown);
         buildCooled = true; 
+    }
+
+    public List<Unit> GetUnits()
+    {
+        if(units.Count > 0 && state != States.HasMixed)
+            return units;
+
+        return null; 
     }
 
 }

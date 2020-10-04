@@ -1,5 +1,35 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4751168471939582293
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7886767555220903140}
+  m_Layer: 12
+  m_Name: SpawnPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7886767555220903140
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4751168471939582293}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.679, y: -0.392, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 6892392738904420320}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6892392738904420324
 GameObject:
   m_ObjectHideFlags: 0
@@ -13,10 +43,11 @@ GameObject:
   - component: {fileID: 6892392738904420322}
   - component: {fileID: 6892392738904420323}
   - component: {fileID: 153987031616257874}
-  - component: {fileID: 1991697157029640872}
+  - component: {fileID: 1890167446691939272}
+  - component: {fileID: 6685686619599264644}
   m_Layer: 12
-  m_Name: House
-  m_TagString: Building
+  m_Name: Town center
+  m_TagString: TownCenter
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -31,7 +62,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -3.6539297, y: 2.2790496, z: 7.279509}
   m_LocalScale: {x: 3, y: 1, z: 3}
-  m_Children: []
+  m_Children:
+  - {fileID: 7886767555220903140}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -111,7 +143,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
---- !u!114 &1991697157029640872
+--- !u!114 &1890167446691939272
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -120,10 +152,30 @@ MonoBehaviour:
   m_GameObject: {fileID: 6892392738904420324}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9726c1a390b7fa24091b7acb2ecfc1a8, type: 3}
+  m_Script: {fileID: 11500000, guid: 60580261752af5f478388934a4ded464, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  optionsPanel: {fileID: 4212498884343866779, guid: 97ee7a730c9e7524080619bd97d1ba51,
-    type: 3}
-  unitName: House
+  optionsPanel: {fileID: 0}
+  unitName: Town Center
   health: 0
+  state: 0
+  units:
+  - {fileID: 2922587461598930017, guid: eb0e145cbffec2243a2c1abf4929e018, type: 3}
+  maxUnitsCanCreate: 15
+  spawnPos: {fileID: 7886767555220903140}
+--- !u!208 &6685686619599264644
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6892392738904420324}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.6, y: 0.515, z: 0.6}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
