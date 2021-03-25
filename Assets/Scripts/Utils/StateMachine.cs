@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Test : MonoBehaviour
+public class StateMachine : MonoBehaviour
 {
     // Start is called before the first frame update
     void Start()
@@ -14,13 +14,5 @@ public class Test : MonoBehaviour
     void Update()
     {
         
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if(other.tag == "Ghost")
-        {
-            Debug.Log("Exit"); 
-        }
     }
 }

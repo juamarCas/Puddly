@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.EventSystems; 
 using UnityEngine;
+using Utils.Raycasting; 
 
 public class God : MonoBehaviour
 {
@@ -21,11 +22,13 @@ public class God : MonoBehaviour
     //is selecting place to construct? 
     private bool isConstructing;
 
+    private RaycastHelper rayHelper; 
+
     // saves the gameobject you interact with, the list of units o the unit
-    [SerializeField] List<Unit> units = new List<Unit>(); 
+    [SerializeField] private List<Unit> units = new List<Unit>(); 
 
     // units you have created
-    [SerializeField] List<Unit> createdUnits = new List<Unit>(); //optimize this list, only the units in the camera view can enter this list
+    [SerializeField] private List<Unit> createdUnits = new List<Unit>(); //optimize this list, only the units in the camera view can enter this list
 
 
     //by now, not important, is for UI check
@@ -75,7 +78,8 @@ public class God : MonoBehaviour
     public BuildingSel buildSel; 
     void Start()
     {
-        cam = Camera.main; 
+        cam = Camera.main;
+        rayHelper = new RaycastHelper(); 
         state = States.Free;
         UIHolder.gameObject.SetActive(false);
         buildSel = BuildingSel.Nothing; 
@@ -104,9 +108,14 @@ public class God : MonoBehaviour
         #region one one unit selection
         if (Input.GetMouseButtonDown(0) && Input.GetKey(KeyCode.LeftShift))
         {
-            GameObject unit = SelectObject(selectableUnitMask);
-            if(unit != null)
+            GameObject unit = rayHelper.RayTo(selectableUnitMask);
+            if (unit != null)
                 units.Add(unit.GetComponent<Unit>());
+            else
+                UnSelectUnit();
+
+            Debug.Log(unit); 
+                 
             unit = null; 
         } else if (Input.GetMouseButtonDown(0))
         {
@@ -116,49 +125,54 @@ public class God : MonoBehaviour
             if (!isConstructing)
             {
                 //selecting a unit   
-                GameObject unit = SelectObject(selectableUnitMask);
+                GameObject unit = rayHelper.RayTo(selectableUnitMask, tileMask);                                             
                 if (unit != null)
-                {                  
+                {
+                    if (unit.tag == "Tile")
+                    {
+                        UnSelectUnit();
+                        return;
+                    }
+                    Unit u = unit.GetComponent<Unit>();
                     UIHolder.gameObject.SetActive(true);
                     SetOffUI();
-                    units.Clear(); 
-                    canvas.nameText.text = unit.GetComponent<Unit>().unitName;
+                    units.Clear();
+                    canvas.nameText.text = u.unitName;
                     switch (unit.gameObject.tag)
                     {
                         case "Villager":
                             state = States.HasVillager;
-                            units.Add(unit.GetComponent<Unit>());
+                            units.Add(u);
                             break;
                         case "TownCenter":
                             state = States.HasTownCenter;
-                            TownCenterOptions.gameObject.SetActive(true); 
-                            units.Add(unit.GetComponent<Unit>());
+                            TownCenterOptions.gameObject.SetActive(true);
+                            units.Add(u);
                             break;
                         default:
                             state = States.Free;
-                            break; 
+                            break;
 
                     }
-                      
-                }           
+
+                }
+                
             }
         }else if (Input.GetMouseButtonDown(1))
         {
-            //make an action with villager, warrior or building
-            if(state == States.HasVillager)
-            {
+            //make an action with villager, warrior or building     
                 //get villager properties
                 if(units.Count > 0)
                 {
-                    for(int i = 0; i < units.Count; i++)
+                    foreach(Unit u in units)
                     {
-                        if(units[i].transform.tag == "Villager")
+                        if(u.GetType() == typeof(Puddly)) //ask if is a puddly
                         {
-                            units[i].gameObject.GetComponent<Puddly>().MoveDestination(DestinationPoint()); 
+                            u.gameObject.GetComponent<Puddly>().MoveDestination(rayHelper.RayTo(tileMask, this.transform)); 
                         }
-                    }
+                    }                 
                 }
-            }
+            
         }
         #endregion
 
@@ -173,7 +187,8 @@ public class God : MonoBehaviour
         //start box selection
         if (Input.GetMouseButton(0))
         {
-            UpdateSelectionBox(Input.mousePosition); 
+            if(!Input.GetKey(KeyCode.LeftShift))
+                UpdateSelectionBox(Input.mousePosition); 
         }
         #endregion
 
@@ -189,11 +204,11 @@ public class God : MonoBehaviour
     {
         //select a tile
         RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition); 
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition); 
         if(Physics.Raycast(ray, out hit, Mathf.Infinity, tileMask))
         {
             hoveredTile = hit.transform.gameObject;
-            Vector3 spawnPos = new Vector3(hoveredTile.transform.position.x, hoveredTile.transform.position.y+1, hoveredTile.transform.position.z);
+            Vector3 spawnPos = new Vector3(hoveredTile.transform.position.x, hoveredTile.transform.position.y+1.91f, hoveredTile.transform.position.z);
             Building_ghost[selectedBuilding].transform.position = spawnPos;
             Building_ghost[selectedBuilding].SetActive(true);
             if (Building_ghost[selectedBuilding].GetComponent<BuildingsCheck>().canBuild)
@@ -213,42 +228,6 @@ public class God : MonoBehaviour
         }
     }
    
- 
-    GameObject SelectObject(LayerMask desiredLayer)
-    {
-        if (!EventSystem.current.IsPointerOverGameObject()) //if the mouse is over the UI, dont execute this function
-        {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, desiredLayer))
-            { 
-                return hit.transform.gameObject;
-            }
-            else
-            { 
-                //if click any othe place, just unselect
-                UnSelectUnit();
-            }
-        }
-        
-        return null; 
-    }
-
-    Vector3 DestinationPoint()
-    {
-        
-        if(!EventSystem.current.IsPointerOverGameObject()){
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, tileMask))
-            {             
-                if (hit.transform.gameObject.GetComponent<Tiles>().state == Tiles.States.free)                   
-                    return hit.transform.position;
-            }
-        }
-        return this.transform.position; 
-    }
-
     void UnSelectUnit()
     {
         if (units.Count > 0)
@@ -271,7 +250,7 @@ public class God : MonoBehaviour
         state = States.Free;
         buildSel = BuildingSel.Nothing;
         if (Building_ghost[selectedBuilding].activeSelf) Building_ghost[selectedBuilding].SetActive(false);
-        Building_ghost[selectedBuilding].transform.position = this.transform.position;
+        Building_ghost[selectedBuilding].transform.position = transform.position;
         isConstructing = false; 
     }
 
@@ -319,7 +298,6 @@ public class God : MonoBehaviour
         TownCenterOptions.SetActive(false);
         VillagerOptions.SetActive(false); 
     }
-    #endregion
 
     void SetBuilding()
     {
@@ -328,6 +306,8 @@ public class God : MonoBehaviour
         Building_ghost[selectedBuilding].transform.position = this.transform.position;
         Building_ghost[selectedBuilding].SetActive(false); 
     }
+    #endregion
+
 
     private IEnumerator BuildingCoolDown()
     {
@@ -342,5 +322,7 @@ public class God : MonoBehaviour
 
         return null; 
     }
+
+    public List<Unit> GetPuddlyCreatedList() { return createdUnits; }
 
 }

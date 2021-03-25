@@ -9,6 +9,7 @@ TagManager:
   - Ghost
   - Villager
   - TownCenter
+  - Resource
   layers:
   - Default
   - TransparentFX

@@ -61,16 +61,16 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
-    - _Glossiness: 0.5
+    - _Glossiness: -1.81
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _OutValue: 0.1
     - _Parallax: 0.02
-    - _RimAmount: 0.7
-    - _RimThreshold: 0.136
-    - _ShadowStrength: 1
+    - _RimAmount: 0.75
+    - _RimThreshold: 0.97
+    - _ShadowStrength: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -78,9 +78,9 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _AmbientColor: {r: 0.5223834, g: 0.52646786, b: 0.8584906, a: 1}
-    - _Color: {r: 0.46967092, g: 0.5566038, b: 0.16540584, a: 1}
+    - _Color: {r: 1, g: 0, b: 0.028783798, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _OutColor: {r: 1, g: 1, b: 1, a: 1}
-    - _RimColor: {r: 0.14597507, g: 0.16981131, b: 0.14177643, a: 1}
-    - _SpecularColor: {r: 0, g: 0, b: 0, a: 1}
-    - _TexColor: {r: 0.4, g: 0.4, b: 0.4, a: 1}
+    - _RimColor: {r: 0.4438293, g: 0.5849056, b: 0.42212528, a: 1}
+    - _SpecularColor: {r: 0.6132076, g: 0.5293254, b: 0.5293254, a: 1}
+    - _TexColor: {r: 1, g: 0.9481132, b: 0.9481132, a: 1}

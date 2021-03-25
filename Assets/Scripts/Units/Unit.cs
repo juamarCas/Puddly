@@ -17,11 +17,6 @@ public class Unit : MonoBehaviour
     public string unitName;
     public float health; 
 
-   
-    
-
-
-   
 
     private void Awake()
     {
@@ -44,7 +39,7 @@ public class Unit : MonoBehaviour
        
     }
 
-
+/*
     //add tiles that are under the unit
     private void OnTriggerEnter(Collider other)
     {
@@ -66,5 +61,5 @@ public class Unit : MonoBehaviour
         this.gameObject.SetActive(false); 
     }
 
-
+    */
 }
